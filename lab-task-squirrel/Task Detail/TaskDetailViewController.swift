@@ -4,7 +4,7 @@
 //
 //  Created by Charlie Hieger on 11/15/22.
 //
-
+import PhotosUI
 import UIKit
 import MapKit
 
@@ -58,7 +58,30 @@ class TaskDetailViewController: UIViewController {
     }
 
     @IBAction func didTapAttachPhotoButton(_ sender: Any) {
-        // TODO: Check and/or request photo library access authorization.
+        // If authorized, show photo picker, otherwise request authorization.
+        // If authorization denied, show alert with option to go to settings to update authorization.
+        if PHPhotoLibrary.authorizationStatus(for: .readWrite) != .authorized {
+            // Request photo library access
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] status in
+                switch status {
+                case .authorized:
+                    // The user authorized access to their photo library
+                    // show picker (on main thread)
+                    DispatchQueue.main.async {
+                        self?.presentImagePicker()
+                    }
+                default:
+                    // show settings alert (on main thread)
+                    DispatchQueue.main.async {
+                        // Helper method to show settings alert
+                        self?.presentGoToSettingsAlert()
+                    }
+                }
+            }
+        } else {
+            // Show photo picker
+            presentImagePicker()
+        }
 
     }
 
